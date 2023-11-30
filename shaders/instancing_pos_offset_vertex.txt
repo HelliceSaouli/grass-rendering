@@ -1,0 +1,108 @@
+#version 450
+
+#define PI 3.14159
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 uv;
+layout(location = 3) in vec4 position_offset;
+
+out vec3 normal_frag;
+out vec2 uv_frag;
+out vec3 worldpos;
+
+uniform mat4 model_matrix;
+uniform mat4 view_matrix;
+uniform mat4 projection_matrix;
+uniform float time;
+
+vec2 generateTiledUV(vec3 worldPos, vec2 offset, vec2 tilling)
+{
+    // https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Tiling-And-Offset-Node.html
+    return worldPos.xy * tilling + offset;
+}
+
+vec2 hash(vec2 p)
+{
+    return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453);
+}
+
+float hash3(vec3 p)
+{
+    p  = fract( p*0.3183099+.1 );
+	p *= 17.0;
+    return fract( p.x*p.y*p.z*(p.x+p.y+p.z) );
+}
+
+float gradientNoise(vec2 p)
+{
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+
+    // Four corner gradients
+    float a = dot(hash(i), f);
+    float b = dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));
+    float c = dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));
+    float d = dot(hash(i + vec2(1.0)), f - vec2(1.0));
+
+    // Smooth interpolation
+    vec2 u = smoothstep(0.0, 1.0, f);
+
+    // Interpolate along x-axis
+    float ab = mix(a, b, u.x);
+    float cd = mix(c, d, u.x);
+
+    // Interpolate along y-axis
+    float noise = mix(ab, cd, u.y);
+
+    return noise;
+}
+
+float sampleNoise(vec2 uv, float scale)
+{
+    // Scale the UV coordinates as needed
+    vec2 scaledUV = uv * scale;
+
+    // Sample the noise function
+    float noise = gradientNoise(scaledUV);
+    // return value in [-1, 1]
+    return noise;
+}
+
+mat3 rotate(float angle, vec3 axis){
+    mat3 rotationMatrix = mat3(1.0);
+    float c = cos(angle);
+    float s = sin(angle);
+
+    mat3 crossProductMatrix = mat3(0, -axis.z, axis.y,
+                                   axis.z, 0, -axis.x,
+                                   -axis.y, axis.x, 0);
+    rotationMatrix = c * mat3(1.0) + (1.0 - c) * outerProduct(axis, axis) + s * crossProductMatrix;
+    return rotationMatrix;
+}
+
+void main(){
+    vec2 windmovement  = vec2(2.0, -2.0) * ((time + gl_InstanceID)/1000);
+    float wind_strengh = 0.6;
+
+    vec3 pos = position;
+
+    pos.y *= position_offset.w;
+    float angleZ = hash3(position_offset.xyz) * 2 * PI;
+    float angleX = hash3(position_offset.xyw) * 0.4 * PI * 0.5;
+    pos = rotate(angleZ , vec3(0.0, 1.0, 0.0)) * pos;
+    pos = rotate(angleX , vec3(1.0, 0.0, 0.0)) * pos;
+    pos = pos + position_offset.xyz;
+
+
+    worldpos = (model_matrix * vec4(pos, 1.0f)).xyz;
+    vec2 wind_tiling = generateTiledUV(worldpos, windmovement, vec2(1.0));
+    float gradient_texture = sampleNoise(wind_tiling, 0.06);
+    gradient_texture *= wind_strengh ;
+
+    vec3 displacement = worldpos + vec3(gradient_texture, 0, 0);
+    worldpos = mix(worldpos, displacement, uv.y);
+    gl_Position  = projection_matrix *  view_matrix  * vec4(worldpos, 1.0);
+    normal_frag =  normalize(mat3(model_matrix) * normal);
+    uv_frag = uv;
+}

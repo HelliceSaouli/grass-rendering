@@ -1,0 +1,15 @@
+#version 450
+
+in vec2 uv_frag;
+
+
+out vec4 color;
+
+
+
+layout (binding = 0) uniform sampler2D shadow_map;
+
+void main(){
+    float depth = texture(shadow_map, gl_FragCoord.xy/512).r;
+    color = vec4(depth,depth, depth, 1.0);
+}

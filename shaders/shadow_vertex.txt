@@ -1,0 +1,17 @@
+#version 450
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 uv;
+
+out vec2 uv_frag;
+
+uniform mat4 model_matrix;
+uniform mat4 light_matrix;
+uniform mat4 light_projection_matrix;
+
+void main(){
+
+    gl_Position  = light_projection_matrix *  light_matrix * model_matrix  * vec4(position, 1.0);
+    uv_frag = uv;
+}

@@ -1,0 +1,100 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v3.2.43",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "Landscape"
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Landscape",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3
+                }
+            ]
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 20301,
+            "max" : [
+                1,
+                0.21910665929317474,
+                1
+            ],
+            "min" : [
+                -1,
+                0.029729370027780533,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 20301,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 20301,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 96774,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 243612,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 243612,
+            "byteOffset" : 243612
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 162408,
+            "byteOffset" : 487224
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 193548,
+            "byteOffset" : 649632
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 843180,
+            "uri" : "landscape.bin"
+        }
+    ]
+}

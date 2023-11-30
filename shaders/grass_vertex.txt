@@ -1,0 +1,23 @@
+#version 450
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 uv;
+layout(location = 3) in mat4 model_matrix_instances;
+
+out vec3 normal_frag;
+out vec2 uv_frag;
+out vec3 worldpos;
+
+// this model matrix is no longer needed kind of is consided the parent
+uniform mat4 model_matrix;
+uniform mat4 view_matrix;
+uniform mat4 projection_matrix;
+
+
+void main(){
+    gl_Position  = projection_matrix *  view_matrix  * model_matrix_instances * model_matrix  * vec4(position, 1.0);
+    normal_frag =  normalize(mat3(model_matrix_instances) * normal);
+    uv_frag = uv;
+    worldpos = (model_matrix_instances * vec4(position, 1.0f)).xyz;
+}

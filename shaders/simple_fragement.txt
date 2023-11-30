@@ -1,0 +1,54 @@
+#version 450
+
+
+in vec3 normal_frag;
+in vec3 worldpos;
+in vec2 uv_frag;
+
+out vec4 color;
+
+uniform vec3 light_direction;
+uniform vec3 light_color;
+uniform mat4 light_matrix;
+uniform mat4 light_projection_matrix;
+
+uniform vec3 camera_position;
+
+layout (binding = 0) uniform sampler2D shadow_map;
+layout (binding = 1) uniform sampler2D albedo;
+
+float compute_shadow(vec4 pos_lightspace)
+{
+
+    vec3 proj_coord = pos_lightspace.xyz / pos_lightspace.w;
+
+    proj_coord = proj_coord * 0.5 + 0.5;
+
+    float closestDepth = texture(shadow_map, proj_coord.xy).r;
+
+    float currentDepth = proj_coord.z;
+
+    float shadow = currentDepth  - 0.001 > closestDepth  ? 1.0 : 0.0;
+
+    return shadow;
+}
+
+void main(){
+
+    vec3 light_dir = normalize(light_direction);
+    vec3 view_dir  = normalize(camera_position - worldpos);
+
+    float ambientStrength = 0.1;
+    vec3 ambient = ambientStrength * light_color;
+    vec3 objectcolor = texture(albedo, uv_frag).rgb;
+
+    float diff = max(dot(normal_frag, light_dir), 0.0);
+    vec3 diffuse = diff * light_color;
+
+    vec4 lightspace_pos = light_projection_matrix * light_matrix  * vec4(worldpos, 1.0);
+
+    float shadow = compute_shadow(lightspace_pos);
+    vec3 final  = (ambient +  (1 - shadow) * diffuse) * objectcolor;
+
+    color = vec4(final, 1);
+}
